@@ -24,8 +24,26 @@ doCheckInstallDevice() {
 	fi
 }
 
+doConfirmInstall() {
+	lsblk
+	doPrint "Installing to '$INSTALL_DEVICE' - ALL DATA ON IT WILL BE LOST!"
+	doPrint "Enter 'YES' (in capitals) to confirm and start the installation."
+
+	doPrintPrompt "> "
+	read -r i
+	if [ "$i" != "YES" ]; then
+		doPrint "Aborted."
+		exit 0
+	fi
+
+	for i in {10..1}; do
+		doPrint "Starting in $i - Press CTRL-C to abort..."
+		sleep 1
+	done
+}
+
 eval "$(parse_yaml arch-install.yml)"
 
 
 doCheckInstallDevice
-
+doConfirmInstall
