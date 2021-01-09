@@ -40,7 +40,9 @@ doFlush() {
 	sync
 	sync
 }
-
+doPartProbe() {
+	partprobe "$INSTALL_DEVICE"
+}
 doWipeAllPartitions() {
 	for i in $( doGetAllPartitions | sort -r ); do
 		umount "$INSTALL_DEVICE_PATH/$i"
@@ -48,6 +50,13 @@ doWipeAllPartitions() {
 	done
 
 	doFlush
+}
+
+doWipeDevice() {
+	dd if=/dev/zero of="$INSTALL_DEVICE" bs=1M count=1
+
+	doFlush
+	doPartProbe
 }
 
 eval "$(parse_yaml arch-install.yml)"
