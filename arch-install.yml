@@ -18,3 +18,5 @@ BOOT_SIZE: "1024"
 
 
 LUKS_NAME: "lvm"
+LVM_DEVICE_PATH: "/dev/mapper"
+LUKS_LVM_NAME: "system"
