@@ -16,6 +16,8 @@ INSTALL_DEVICE: "/dev/sda"
 
 BOOT_SIZE: "1024"
 
+BOOT_LABEL: "boot"
+ROOT_LABEL: "root"
 
 LUKS_NAME: "lvm"
 LVM_DEVICE_PATH: "/dev/mapper"
