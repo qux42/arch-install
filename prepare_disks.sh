@@ -31,6 +31,16 @@ doDeactivateAllSwaps() {
 	swapoff -a
 }
 
+doGetAllPartitions() {
+	lsblk -l -n -o NAME -x NAME "$INSTALL_DEVICE" | grep "^$INSTALL_DEVICE_FILE" | grep -v "^$INSTALL_DEVICE_FILE$"
+}
+
+doFlush() {
+	sync
+	sync
+	sync
+}
+
 doWipeAllPartitions() {
 	for i in $( doGetAllPartitions | sort -r ); do
 		umount "$INSTALL_DEVICE_PATH/$i"
