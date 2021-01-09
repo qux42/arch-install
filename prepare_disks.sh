@@ -16,7 +16,13 @@ function parse_yaml {
       }
    }'
 }
+doPrintPrompt() {
+	printf "[%s] $*" "$SCRIPT_NAME"
+}
 
+doPrint() {
+	doPrintPrompt "$*\n"
+}
 doCheckInstallDevice() {
 	if [ ! -b "$INSTALL_DEVICE" ]; then
 		printf "ERROR: INSTALL_DEVICE is not a block device ('%s')\n" "$INSTALL_DEVICE"
