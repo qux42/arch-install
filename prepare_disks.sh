@@ -147,7 +147,7 @@ doCreateLuks2() {
 	mkfs.ext4 -L "$LUKS_ROOT_NAME" "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME"
 	mount "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME" /mnt
 	mkdir /mnt/boot
-	moint  "$BOOT_DEVICE" /mnt/boot
+	mount  "$BOOT_DEVICE" /mnt/boot
 	mkdir /mnt/home
 }
 
