@@ -120,12 +120,12 @@ doCreateLvmLuks() {
 
   if [ "$HOME_SIZE" != "0" ] && [ "$HOME_SIZE" != "max" ]
   then
-  	lvcreate -L "$HOME_SIZE" -n "$HOME_LABEL" "$LUKS_LVM_NAME"
+  	lvcreate -L "$HOME_SIZE"GiB -n "$HOME_LABEL" "$LUKS_LVM_NAME"
   fi
 
   if [ "$ROOT_SIZE" != "0" ] && [ "$ROOT_SIZE" != "max" ]
   then
-  	lvcreate -L "$ROOT_SIZE" -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
+  	lvcreate -L "$ROOT_SIZE"GiB -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
   elif [ "$ROOT_SIZE" == "max" ]
   then
   	lvcreate -l 100%FREE -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
