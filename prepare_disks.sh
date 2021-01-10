@@ -77,26 +77,27 @@ doDetectDevicesLvm() {
 	BOOT_DEVICE="$INSTALL_DEVICE_PATH/${ALL_PARTITIONS[0]}"
 	LVM_DEVICE="$INSTALL_DEVICE_PATH/${ALL_PARTITIONS[1]}"
 }
-doCreateLuks() {
-	doPrint "Formatting LUKS device"
-	local EXIT="1"
-	while [ "$EXIT" != "0" ]; do
-		cryptsetup -q -y -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$LUKS_DEVICE"
-		EXIT="$?"
-	done
-
-	local SSD_DISCARD=""
-	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
-		SSD_DISCARD=" --allow-discards"
-	fi
-
-	doPrint "Opening LUKS device"
-	EXIT="1"
-	while [ "$EXIT" != "0" ]; do
-		cryptsetup$SSD_DISCARD luksOpen "$LUKS_DEVICE" "$LUKS_NAME"
-		EXIT="$?"
-	done
-}
+#todo remove
+#doCreateLuks() {
+#	doPrint "Formatting LUKS device"
+#	local EXIT="1"
+#	while [ "$EXIT" != "0" ]; do
+#		cryptsetup -q -y -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$LUKS_DEVICE"
+#		EXIT="$?"
+#	done
+#
+#	local SSD_DISCARD=""
+#	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+#		SSD_DISCARD=" --allow-discards"
+#	fi
+#
+#	doPrint "Opening LUKS device"
+#	EXIT="1"
+#	while [ "$EXIT" != "0" ]; do
+#		cryptsetup$SSD_DISCARD luksOpen "$LUKS_DEVICE" "$LUKS_NAME"
+#		EXIT="$?"
+#	done
+#}
 #todo we don't need anymore
 #doCreateLuksLvm() {
 #	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
@@ -107,7 +108,8 @@ doCreateLuks() {
 #}
 
 doDetectDevicesLuksLvm() {
-	ROOT_DEVICE="$LVM_DEVICE_PATH/$LUKS_LVM_NAME-$ROOT_LABEL"
+	LVM_ROOT_DEVICE="$LVM_DEVICE_PATH/$LVM_NAME-$ROOT_LABEL"
+	LVM_HOME_DEVICE="$LVM_DEVICE_PATH/$LVM_NAME-$HOME_LABEL"
 }
 
 
@@ -115,33 +117,19 @@ doDetectDevicesLuksLvm() {
 
 doCreateLvmLuks() {
 #	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
-	pvcreate "$LVM_DEVICE"
-	vgcreate "$LUKS_LVM_NAME" "$LVM_DEVICE"
+	pvcreate "$LVM_DEVICE" # pvcreate /dev/sda2
+	vgcreate "$LVM_NAME" "$LVM_DEVICE" # vgcreate lvm /dev/sda2
 
-  if [ "$HOME_SIZE" != "0" ] && [ "$HOME_SIZE" != "max" ]
-  then
-  	lvcreate -L "$HOME_SIZE"GiB -n "$HOME_LABEL" "$LUKS_LVM_NAME"
-  fi
-
-  if [ "$ROOT_SIZE" != "0" ] && [ "$ROOT_SIZE" != "max" ]
-  then
-  	lvcreate -L "$ROOT_SIZE"GiB -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
-  elif [ "$ROOT_SIZE" == "max" ]
-  then
-  	lvcreate -l 100%FREE -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
-  fi
-
-  if [ "$HOME_SIZE" == "max" ]
-  then
-  	lvcreate -l 100%FREE -n "$HOME_LABEL" "$LUKS_LVM_NAME"
-  fi
+ 	lvcreate -L "$ROOT_SIZE"GiB -n "$ROOT_LABEL" "$LVM_NAME"
+ 	lvcreate -l 100%FREE -n "$HOME_LABEL" "$LVM_NAME"
 }
 
 doCreateLuks2() {
+
 	doPrint "Formatting LUKS-ROOT device"
 	local EXIT="1"
 	while [ "$EXIT" != "0" ]; do
-		cryptsetup -q -y -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$LUKS_DEVICE"
+		cryptsetup -q -y -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$LVM_ROOT_DEVICE"
 		EXIT="$?"
 	done
 
@@ -153,9 +141,14 @@ doCreateLuks2() {
 	doPrint "Opening LUKS device"
 	EXIT="1"
 	while [ "$EXIT" != "0" ]; do
-		cryptsetup$SSD_DISCARD luksOpen "$LUKS_DEVICE" "$LUKS_NAME"
+		cryptsetup$SSD_DISCARD luksOpen "$LVM_ROOT_DEVICE" "$LUKS_ROOT_NAME"
 		EXIT="$?"
 	done
+	mkfs.ext4 -L "$LUKS_ROOT_NAME" "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME"
+	mount "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME" /mnt
+	mkdir /mnt/boot
+	moint  "$BOOT_DEVICE" /mnt/boot
+	mkdir /mnt/home
 }
 
 
@@ -178,6 +171,7 @@ doDetectDevicesLvm
 isDeviceSsd
 
 doCreateLvmLuks
+doDetectDevicesLuksLvm
 #
 #doCreateLuks2
 #

@@ -17,13 +17,14 @@ INSTALL_DEVICE: "/dev/sda"
 # sizes are in GiB
 BOOT_SIZE: "1"
 ROOT_SIZE: "50"
-
-HOME_SIZE: "max"
+#HOME_SIZE: will be rest
 
 BOOT_LABEL: "boot"
 ROOT_LABEL: "root"
 HOME_LABEL: "home"
 
-LUKS_NAME: "lvm"
+LVM_NAME: "lvm"
 LVM_DEVICE_PATH: "/dev/mapper"
-LUKS_LVM_NAME: "system"
+
+LUKS_ROOT_NAME: root
+LUKS_HOME_NAME: home
