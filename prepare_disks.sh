@@ -190,34 +190,34 @@ setupHome(){
 	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
 		SSD_DISCARD=" -o discard"
 	fi
+	mkdir /mnt/home
 	mount$SSD_DISCARD "$LVM_DEVICE_PATH/$LUKS_HOME_NAME" /mnt/home
 }
+doPacstrap() {
+	pacstrap /mnt base
 
-doCheckInstallDevice
+	doFlush
+}
+
+#doCheckInstallDevice
 #doConfirmInstall
 
 
-doDeactivateAllSwaps
-doWipeAllPartitions
-doWipeDevice
-doCreateNewPartitionTable
-
-# luks
+#doDeactivateAllSwaps
+#doWipeAllPartitions
+#doWipeDevice
+#doCreateNewPartitionTable
 
 
-doCreateNewPartitionsLvm
-doDetectDevicesLvm
-isDeviceSsd
 
-doCreateLvmLuks
-doDetectDevicesLuksLvm
-#
-doCreateLuks2
-doFormat
-doMount
-setupHome
-#
-#
+#doCreateNewPartitionsLvm
+#doDetectDevicesLvm
+#isDeviceSsd
+
+#doCreateLvmLuks
 #doDetectDevicesLuksLvm
-#
-#echo $ROOT_DEVICE
+#doCreateLuks2
+#doFormat
+#doMount
+#setupHome
+doPacstrap
