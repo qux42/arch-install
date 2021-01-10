@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -x
 source functions.sh
 
 doCheckInstallDevice() {
@@ -162,7 +162,7 @@ doCreateLuks2() {
 
 
 doCheckInstallDevice
-doConfirmInstall
+#doConfirmInstall
 
 
 doDeactivateAllSwaps
@@ -174,8 +174,9 @@ doCreateNewPartitionTable
 doCreateNewPartitionsLvm
 doDetectDevicesLvm
 
-#isDeviceSsd
-#doCreateLvmLuks
+isDeviceSsd
+
+doCreateLvmLuks
 #
 #doCreateLuks2
 #
