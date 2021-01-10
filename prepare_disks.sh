@@ -173,7 +173,7 @@ isDeviceSsd
 doCreateLvmLuks
 doDetectDevicesLuksLvm
 #
-#doCreateLuks2
+doCreateLuks2
 #
 #
 #doDetectDevicesLuksLvm
