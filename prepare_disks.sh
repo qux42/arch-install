@@ -118,12 +118,12 @@ doCreateLvmLuks() {
 	pvcreate "$LVM_DEVICE"
 	vgcreate "$LUKS_LVM_NAME" "$LVM_DEVICE"
 
-  if [ "$HOME_SIZE" != "0" ]
+  if [ "$HOME_SIZE" != "0" ] && [ "$HOME_SIZE" != "max" ]
   then
   	lvcreate -L "$HOME_SIZE" -n "$HOME_LABEL" "$LUKS_LVM_NAME"
   fi
 
-  if [ "$ROOT_SIZE" != "0" ]
+  if [ "$ROOT_SIZE" != "0" ] && [ "$ROOT_SIZE" != "max" ]
   then
   	lvcreate -L "$ROOT_SIZE" -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
   elif [ "$ROOT_SIZE" == "max" ]
