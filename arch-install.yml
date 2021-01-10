@@ -14,10 +14,13 @@ INSTALL_DEVICE: "/dev/sda"
 #    P A R T I T I O N   S I Z E S
 # =================================================================================
 
-BOOT_SIZE: "1024"
+BOOT_SIZE: "1G"
+ROOT_SIZE: "50G"
+HOME_SIZE: "max"
 
 BOOT_LABEL: "boot"
 ROOT_LABEL: "root"
+HOME_LABEL: "home"
 
 LUKS_NAME: "lvm"
 LVM_DEVICE_PATH: "/dev/mapper"

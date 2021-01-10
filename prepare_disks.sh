@@ -57,7 +57,7 @@ doCreateNewPartitionTable() {
 	parted -s -a optimal "$INSTALL_DEVICE" mklabel gpt
 }
 
-doCreateNewPartitionsLuks() {
+doCreateNewPartitionsLvm() {
 	local START="1"; local END="$BOOT_SIZE"
 	parted -s -a optimal "$INSTALL_DEVICE" mkpart primary fat32 "${START}MiB" "${END}MiB"
 
@@ -70,11 +70,12 @@ doCreateNewPartitionsLuks() {
 	doFlush
 	doPartProbe
 }
-doDetectDevicesLuks() {
-	local ALL_PARTITIONS=($( doGetAllPartitions ))
+doDetectDevicesLvm() {
+	local ALL_PARTITIONS
+	mapfile -t ALL_PARTITIONS < <(doGetAllPartitions)
 
 	BOOT_DEVICE="$INSTALL_DEVICE_PATH/${ALL_PARTITIONS[0]}"
-	LUKS_DEVICE="$INSTALL_DEVICE_PATH/${ALL_PARTITIONS[1]}"
+	LVM_DEVICE="$INSTALL_DEVICE_PATH/${ALL_PARTITIONS[1]}"
 }
 doCreateLuks() {
 	doPrint "Formatting LUKS device"
@@ -96,18 +97,66 @@ doCreateLuks() {
 		EXIT="$?"
 	done
 }
-doCreateLuksLvm() {
-	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
-
-	pvcreate "$LUKS_LVM_DEVICE"
-	vgcreate "$LUKS_LVM_NAME" "$LUKS_LVM_DEVICE"
-	lvcreate -l 100%FREE -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
-}
+#todo we don't need anymore
+#doCreateLuksLvm() {
+#	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
+#
+#	pvcreate "$LUKS_LVM_DEVICE"
+#	vgcreate "$LUKS_LVM_NAME" "$LUKS_LVM_DEVICE"
+#	lvcreate -l 100%FREE -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
+#}
 
 doDetectDevicesLuksLvm() {
 	ROOT_DEVICE="$LVM_DEVICE_PATH/$LUKS_LVM_NAME-$ROOT_LABEL"
 }
 
+
+
+
+doCreateLvmLuks() {
+	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
+	pvcreate "$LUKS_LVM_DEVICE"
+	vgcreate "$LUKS_LVM_NAME" "$LUKS_LVM_DEVICE"
+
+  if [ "$HOME_SIZE" != "0" ]
+  then
+  	lvcreate -L "$HOME_SIZE" -n "$HOME_LABEL" "$LUKS_LVM_NAME"
+  fi
+
+  if [ "$ROOT_SIZE" != "0" ]
+  then
+  	lvcreate -L "$ROOT_SIZE" -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
+  elif [ "$ROOT_SIZE" == "max" ]
+  then
+  	lvcreate -l 100%FREE -n "$ROOT_LABEL" "$LUKS_LVM_NAME"
+  fi
+
+  if [ "$HOME_SIZE" == "max" ]
+  then
+  	lvcreate -l 100%FREE -n "$HOME_LABEL" "$LUKS_LVM_NAME"
+  fi
+}
+
+doCreateLuks2() {
+	doPrint "Formatting LUKS-ROOT device"
+	local EXIT="1"
+	while [ "$EXIT" != "0" ]; do
+		cryptsetup -q -y -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$LUKS_DEVICE"
+		EXIT="$?"
+	done
+
+	local SSD_DISCARD=""
+	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+		SSD_DISCARD=" --allow-discards"
+	fi
+
+	doPrint "Opening LUKS device"
+	EXIT="1"
+	while [ "$EXIT" != "0" ]; do
+		cryptsetup$SSD_DISCARD luksOpen "$LUKS_DEVICE" "$LUKS_NAME"
+		EXIT="$?"
+	done
+}
 
 
 
@@ -122,16 +171,15 @@ doWipeDevice
 doCreateNewPartitionTable
 
 # luks
-doCreateNewPartitionsLuks
-doDetectDevicesLuks
-isDeviceSsd
-doCreateLuks
-doCreateLuksLvm
-doDetectDevicesLuksLvm
-#			doCreateNewPartitionsLuks
-#			doDetectDevicesLuks
-#			doCreateLuks
-#			doCreateLuksLvm
-#			doDetectDevicesLuksLvm
-echo $SWAP_DEVICE
-echo $ROOT_DEVICE
+doCreateNewPartitionsLvm
+doDetectDevicesLvm
+
+#isDeviceSsd
+#doCreateLvmLuks
+#
+#doCreateLuks2
+#
+#
+#doDetectDevicesLuksLvm
+#
+#echo $ROOT_DEVICE
