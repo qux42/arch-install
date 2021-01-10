@@ -31,7 +31,7 @@ function isDeviceSsd {
 	  INSTALL_DEVICE_IS_SSD="yes"
   else
 	  INSTALL_DEVICE_IS_SSD="no"
-fi
+  fi
 }
 
 eval "$(parse_yaml arch-install.yml)"

@@ -232,5 +232,5 @@ doGenerateFstab() {
 #setupHome
 echo "home $LVM_HOME_DEVICE /etc/luks-keys/home" >> /mnt/etc/crypttab
 #doPacstrap
-
+echo "$INSTALL_DEVICE_IS_SSD $INSTALL_DEVICE_SSD_DISCARD"
 doGenerateFstab
