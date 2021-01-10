@@ -199,6 +199,16 @@ doPacstrap() {
 	doFlush
 }
 
+doGenerateFstab() {
+	genfstab -p -U /mnt >> /mnt/etc/fstab
+
+	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+		cat /mnt/etc/fstab | sed -e 's/\(data=ordered\)/\1,discard/' > /tmp/fstab
+		cat /tmp/fstab > /mnt/etc/fstab
+		rm /tmp/fstab
+	fi
+}
+
 #doCheckInstallDevice
 #doConfirmInstall
 
@@ -220,4 +230,7 @@ doPacstrap() {
 #doFormat
 #doMount
 #setupHome
-doPacstrap
+echo "home $LVM_HOME_DEVICE /etc/luks-keys/home" >> /mnt/etc/crypttab
+#doPacstrap
+
+doGenerateFstab
