@@ -165,11 +165,11 @@ doMount() {
 }
 
 setupHome(){
-  mksdir -m 700 /etc/luks-keys
+  mkdir -m 700 /mnt/etc/luks-keys
   dd if=/dev/random of=/etc/luks-keys/home bs=1 count=256 status=progress
 
  	while [ "$EXIT" != "0" ]; do
-    cryptsetup luksFormat -v "$LVM_HOME_DEVICE" /etc/luks-keys/home
+    cryptsetup luksFormat -v "$LVM_HOME_DEVICE" /mnt/etc/luks-keys/home
 		EXIT="$?"
 	done
 
@@ -181,7 +181,7 @@ setupHome(){
 	doPrint "Opening LUKS device"
 	EXIT="1"
 	while [ "$EXIT" != "0" ]; do
-		cryptsetup$SSD_DISCARD -d /etc/luks-keys/home open "$LVM_HOME_DEVICE" "$LUKS_HOME_NAME"
+		cryptsetup$SSD_DISCARD -d /mnt/etc/luks-keys/home open "$LVM_HOME_DEVICE" "$LUKS_HOME_NAME"
 		EXIT="$?"
 	done
 	mkfs.ext4 -L "$LUKS_HOME_NAME" "$LVM_DEVICE_PATH/$LUKS_HOME_NAME"
