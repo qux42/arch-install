@@ -14,8 +14,10 @@ INSTALL_DEVICE: "/dev/sda"
 #    P A R T I T I O N   S I Z E S
 # =================================================================================
 
-BOOT_SIZE: "1G"
-ROOT_SIZE: "50G"
+# sizes are in GiB
+BOOT_SIZE: "1"
+ROOT_SIZE: "50"
+
 HOME_SIZE: "max"
 
 BOOT_LABEL: "boot"

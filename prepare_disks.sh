@@ -59,10 +59,10 @@ doCreateNewPartitionTable() {
 
 doCreateNewPartitionsLvm() {
 	local START="1"; local END="$BOOT_SIZE"
-	parted -s -a optimal "$INSTALL_DEVICE" mkpart primary fat32 "${START}MiB" "${END}MiB"
+	parted -s -a optimal "$INSTALL_DEVICE" mkpart primary fat32 "${START}MiB" "${END}GiB"
 
 	START="$END"; END="100%"
-	parted -s -a optimal "$INSTALL_DEVICE" mkpart primary "${START}MiB" "${END}MiB"
+	parted -s -a optimal "$INSTALL_DEVICE" mkpart primary "${START}MiB" "${END}"
 
 	parted -s -a optimal "$INSTALL_DEVICE" set 1 boot on
 	parted -s -a optimal "$INSTALL_DEVICE" set 2 lvm on
