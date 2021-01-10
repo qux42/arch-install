@@ -165,7 +165,7 @@ doMount() {
 }
 
 setupHome(){
-  mkdir -m 700 /mnt/etc/luks-keys
+  mkdir -pm 700 /mnt/etc/luks-keys
   dd if=/dev/random of=/etc/luks-keys/home bs=1 count=256 status=progress
 
  	while [ "$EXIT" != "0" ]; do
