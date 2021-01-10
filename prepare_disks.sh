@@ -166,7 +166,7 @@ doMount() {
 
 setupHome(){
   mkdir -pm 700 /mnt/etc/luks-keys
-  dd if=/dev/random of=/etc/luks-keys/home bs=1 count=256 status=progress
+  dd if=/dev/random of=/mnt/etc/luks-keys/home bs=1 count=256 status=progress
 
  	while [ "$EXIT" != "0" ]; do
     cryptsetup luksFormat -v "$LVM_HOME_DEVICE" /mnt/etc/luks-keys/home
