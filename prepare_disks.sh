@@ -144,18 +144,54 @@ doCreateLuks2() {
 		cryptsetup$SSD_DISCARD luksOpen "$LVM_ROOT_DEVICE" "$LUKS_ROOT_NAME"
 		EXIT="$?"
 	done
-	mkfs.ext4 -L "$LUKS_ROOT_NAME" "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME"
-	mount "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME" /mnt
 
+
+}
+doFormat() {
+  mkfs.ext4 -L "$LUKS_ROOT_NAME" "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME"
   mkfs -t fat -F 32 -n "$BOOT_LABEL" "$BOOT_DEVICE"
-
-	mkdir /mnt/boot
-	mount  "$BOOT_DEVICE" /mnt/boot
-	mkdir /mnt/home
 }
 
+doMount() {
+	local SSD_DISCARD=""
+	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+		SSD_DISCARD=" -o discard"
+	fi
 
+	mount$SSD_DISCARD "$LVM_DEVICE_PATH/$LUKS_ROOT_NAME" /mnt
+	mkdir /mnt/boot
+	mount$SSD_DISCARD "$BOOT_DEVICE" /mnt/boot
 
+}
+
+setupHome(){
+  mksdir -m 700 /etc/luks-keys
+  dd if=/dev/random of=/etc/luks-keys/home bs=1 count=256 status=progress
+
+ 	while [ "$EXIT" != "0" ]; do
+    cryptsetup luksFormat -v "$LVM_HOME_DEVICE" /etc/luks-keys/home
+		EXIT="$?"
+	done
+
+	local SSD_DISCARD=""
+	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+		SSD_DISCARD=" --allow-discards"
+	fi
+
+	doPrint "Opening LUKS device"
+	EXIT="1"
+	while [ "$EXIT" != "0" ]; do
+		cryptsetup$SSD_DISCARD -d /etc/luks-keys/home open "$LVM_HOME_DEVICE" "$LUKS_HOME_NAME"
+		EXIT="$?"
+	done
+	mkfs.ext4 -L "$LUKS_HOME_NAME" "$LVM_DEVICE_PATH/$LUKS_HOME_NAME"
+
+	SSD_DISCARD=""
+	if [ "$INSTALL_DEVICE_IS_SSD" == "yes" ] && [ "$INSTALL_DEVICE_SSD_DISCARD" == "yes" ]; then
+		SSD_DISCARD=" -o discard"
+	fi
+	mount$SSD_DISCARD "$LVM_DEVICE_PATH/$LUKS_HOME_NAME" /mnt/home
+}
 
 doCheckInstallDevice
 #doConfirmInstall
@@ -177,6 +213,9 @@ doCreateLvmLuks
 doDetectDevicesLuksLvm
 #
 doCreateLuks2
+doFormat
+doMount
+setupHome
 #
 #
 #doDetectDevicesLuksLvm
