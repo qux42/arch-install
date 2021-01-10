@@ -114,9 +114,9 @@ doDetectDevicesLuksLvm() {
 
 
 doCreateLvmLuks() {
-	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
-	pvcreate "$LUKS_LVM_DEVICE"
-	vgcreate "$LUKS_LVM_NAME" "$LUKS_LVM_DEVICE"
+#	local LUKS_LVM_DEVICE="$LVM_DEVICE_PATH/$LUKS_NAME"
+	pvcreate "$LVM_DEVICE"
+	vgcreate "$LUKS_LVM_NAME" "$LVM_DEVICE"
 
   if [ "$HOME_SIZE" != "0" ]
   then
@@ -171,9 +171,10 @@ doWipeDevice
 doCreateNewPartitionTable
 
 # luks
+
+
 doCreateNewPartitionsLvm
 doDetectDevicesLvm
-
 isDeviceSsd
 
 doCreateLvmLuks
