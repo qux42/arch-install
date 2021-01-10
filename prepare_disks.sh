@@ -222,7 +222,7 @@ doGenerateFstab() {
 
 #doCreateNewPartitionsLvm
 #doDetectDevicesLvm
-#isDeviceSsd
+isDeviceSsd
 
 #doCreateLvmLuks
 #doDetectDevicesLuksLvm
